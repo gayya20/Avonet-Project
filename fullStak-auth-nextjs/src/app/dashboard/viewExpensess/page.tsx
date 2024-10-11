@@ -8,13 +8,15 @@ const ViewExpenses = () => {
   const [expenses, setExpenses] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const { data: session, status } = useSession(); // Add status to track session state
+  const { data: session, status } = useSession();
+  const [filterType, setFilterType] = useState(""); // State for filter type
+  const [filteredExpenses, setFilteredExpenses] = useState([]); // State for filtered expenses
 
   useEffect(() => {
     const fetchExpenses = async () => {
-      if (status === "loading") return; // Wait for session to be checked
-      
-      if (!session?.user?.id) { // More specific check for user ID
+      if (status === "loading") return;
+
+      if (!session?.user?.id) {
         setError('Please log in to view expenses');
         setLoading(false);
         return;
@@ -27,6 +29,7 @@ const ViewExpenses = () => {
         }
         const data = await response.json();
         setExpenses(data);
+        setFilteredExpenses(data); // Initialize filtered expenses with all expenses
       } catch (err) {
         setError(err.message);
       } finally {
@@ -37,8 +40,22 @@ const ViewExpenses = () => {
     fetchExpenses();
   }, [session, status]);
 
+  // Handle type filter change
+  const handleFilterChange = (e) => {
+    const type = e.target.value;
+    setFilterType(type);
+    
+    // Filter expenses based on type
+    if (type) {
+      const filtered = expenses.filter(expense => expense.type === type); // Assuming 'type' exists in your expense object
+      setFilteredExpenses(filtered);
+    } else {
+      setFilteredExpenses(expenses); // Show all expenses if no filter is applied
+    }
+  };
+
   const handleDelete = async (expenseId) => {
-    if (!session?.user?.id) { // More specific check for user ID
+    if (!session?.user?.id) {
       setError("Please log in to delete expenses");
       return;
     }
@@ -61,6 +78,9 @@ const ViewExpenses = () => {
       setExpenses((prevExpenses) => 
         prevExpenses.filter((expense) => expense.id !== expenseId)
       );
+      setFilteredExpenses((prevFiltered) => 
+        prevFiltered.filter((expense) => expense.id !== expenseId)
+      );
     } catch (err) {
       setError(err.message);
     } finally {
@@ -78,10 +98,29 @@ const ViewExpenses = () => {
       
       {loading && <div>Loading expenses...</div>}
       {error && <div className="text-red-500">{error}</div>}
+
+      {/* Filter section */}
+      <div className="mb-4">
+        <label className="mr-2" htmlFor="filterType">Filter by Type:</label>
+        <select 
+          id="filterType" 
+          value={filterType} 
+          onChange={handleFilterChange} 
+          className="border rounded p-2"
+        >
+          <option value="">All</option>
+          <option value="Food">Food</option>
+          <option value="Transport">Transport</option>
+          <option value="Entertainment">Entertainment</option>
+          <option value="Utilities">Utilities</option>
+
+
+        </select>
+      </div>
       
       {!loading && !error && (
         <ExpensesTable 
-          expenses={expenses} 
+          expenses={filteredExpenses} 
           onDelete={handleDelete} 
         />
       )}

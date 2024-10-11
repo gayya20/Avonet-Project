@@ -2,9 +2,8 @@
 
 import React, { useEffect, useState } from "react";
 import { useSession } from "next-auth/react";
-import { PieChart, Pie, Cell, ResponsiveContainer } from "recharts";
-import ViewExpenses from "./newExpensessDashboard";
 import NewExpensessPie from "./newExpensessPie";
+import WineInfo from "./WineInfo";
 
 interface Expense {
   description: string;
@@ -59,7 +58,9 @@ const DashboardPage: React.FC = () => {
 
   return (
     <div>
+     
       <NewExpensessPie />
+      <WineInfo />
 
     </div>
   );

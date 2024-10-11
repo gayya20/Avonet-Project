@@ -10,9 +10,9 @@ const DashBoardLayout = async (props: Props) => {
   const session = await getServerSession(authOptions);
 
   return (
-    <div className="flex">
+    <div className="flex h-screen"> {/* Set flex container to full height */}
       {/* Sidebar */}
-      <div className="w-64 bg-gray-800 text-white h-screen p-4 shadow-md" style={{height:"100vh"}}>
+      <div className="w-64 bg-gray-800 text-white h-full p-4 shadow-md"> {/* Use h-full to cover the full height */}
         <h1 className="text-lg font-semibold mb-6">Dashboard</h1>
         <ul className="space-y-4">
           <li>
@@ -30,9 +30,7 @@ const DashBoardLayout = async (props: Props) => {
             >
               Add Expenses
             </Link>
-            
           </li>
-
           <li>
             <Link
               className="block p-3 rounded hover:bg-emerald-600 transition duration-200"
@@ -40,7 +38,6 @@ const DashBoardLayout = async (props: Props) => {
             >
               View Expenses
             </Link>
-            
           </li>
           {/* Add more links as needed */}
         </ul>

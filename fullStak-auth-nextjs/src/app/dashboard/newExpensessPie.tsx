@@ -1,5 +1,6 @@
 import { useSession } from 'next-auth/react';
 import { useState, useEffect } from 'react';
+import Swal from 'sweetalert2'; // Import SweetAlert2
 import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from 'recharts';
 
 const COLORS = ['#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF'];
@@ -31,6 +32,23 @@ const ExpenseAnalytics = () => {
         // Calculate total expenses
         const total = data.reduce((sum, expense) => sum + expense.amount, 0);
         setTotalExpenses(total);
+
+        if (total > 10000) {
+          Swal.fire({
+            title: 'Budget Exceeded!',
+            text: 'You have exceeded your budget!',
+            icon: 'warning',
+            confirmButtonText: 'OK',
+            customClass: {
+              popup: 'bg-black', // Black background
+              title: 'text-orange-500 font-semibold text-lg', // Orange for the title
+              content: 'text-white', // White for the content
+              confirmButton: 'bg-orange-500 text-black', // Orange button with black text
+            },
+          });
+        }
+        
+        
       } catch (err) {
         setError(err.message);
       } finally {
@@ -143,6 +161,7 @@ const ExpenseAnalytics = () => {
           </div>
         </div>
       </div>
+      
     </div>
   );
 };
