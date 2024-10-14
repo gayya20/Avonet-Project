@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import { useSession } from "next-auth/react";
-import NewExpensessPie from "./newExpensessPie";
+import ExpenseAnalytics from "./newExpensessPie";
 import WineInfo from "./WineInfo";
 
 interface Expense {
@@ -17,18 +17,11 @@ const DashboardPage: React.FC = () => {
   const [expenses, setExpenses] = useState<Expense[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
 
-  const COLORS = [
-    "#FF6F61", // Coral
-    "#6F5B7F", // Lavender
-    "#88B04B", // Olive Green
-    "#F7CAC9", // Soft Pink
-  ];
-
   useEffect(() => {
     const fetchExpenses = async () => {
       if (status === "authenticated") {
         try {
-          const response = await fetch("http://localhost:8000/expenses", {
+          const response = await fetch(`http://localhost:8000/expenses/user/${session?.user?.id}`, {
             headers: {
               Authorization: `Bearer ${session?.backendTokens?.accessToken}`, // Attach token to the request
             },
@@ -48,20 +41,18 @@ const DashboardPage: React.FC = () => {
     fetchExpenses();
   }, [status, session]);
 
-  // Calculate total expenses and estimated savings
-  const totalExpenses = expenses.reduce((acc, curr) => acc + curr.amount, 0);
-  const estimatedSavings = 1000 - totalExpenses; // Assuming a fixed budget of LKR 1000
-
-  if (status === "loading") return <div>Loading session...</div>; // Handle session loading
-
-  if (loading) return <div>Loading expenses...</div>;
+  if (loading) {
+    return (
+      <div className="animate-pulse space-y-4">
+        <div className="h-100 bg-gray-300 rounded w-full"></div>
+      </div>
+    );
+  }
 
   return (
     <div>
-     
-      <NewExpensessPie />
+      <ExpenseAnalytics expenses={expenses} />
       <WineInfo />
-
     </div>
   );
 };

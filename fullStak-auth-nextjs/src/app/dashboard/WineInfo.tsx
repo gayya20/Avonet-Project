@@ -62,11 +62,12 @@ const WineInfo = () => {
             <div className="px-6 py-4 h-[calc(100%-48px)] flex flex-col justify-between"> {/* Adjusting height for content */}
               <div>
                 <div className="font-bold text-xl mb-1">{wine.wine}</div>
-                <p className="text-gray-300 text-base mb-1">{wine.winery}</p>
-                <p className="text-gray-300 text-base mb-1">Location: {wine.location}</p>
-                <p className="text-gray-300 text-base">
-                  Rating: <span className="font-semibold text-yellow-300">{wine.rating.average}</span> ({wine.rating.reviews})
+                <p className="text-gray-300 mb-1" style={{ fontSize: '0.8rem' }}>{wine.winery}</p>
+                <p className="text-gray-300 mb-1" style={{ fontSize: '0.8rem' }}>Location: {wine.location}</p>
+                <p className="text-gray-300" style={{ fontSize: '0.8rem' }}>
+                Rating: <span className="font-semibold text-yellow-300">{wine.rating.average}</span> ({wine.rating.reviews})
                 </p>
+
               </div>
               <div className="pt-4">
                 <span className="inline-block bg-gray-700 rounded-full px-3 py-1 text-sm font-semibold text-gray-200">Available</span>

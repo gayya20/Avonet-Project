@@ -8,7 +8,9 @@ async function bootstrap() {
   // Enable CORS
   app.enableCors({
     origin: 'http://localhost:3000', // Allow requests from your frontend
-    methods: ['GET', 'POST', 'PUT', 'DELETE'], // Specify allowed methods if needed
+    methods: ['GET', 'POST', 'PUT', 'DELETE','PATCH'], // Specify allowed methods if needed
+    allowedHeaders: ['Content-Type', 'Authorization'], // Allow specific headers
+
   });
 
   app.useGlobalPipes(

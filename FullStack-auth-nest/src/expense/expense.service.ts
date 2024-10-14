@@ -1,5 +1,5 @@
 // src/expense/expense.service.ts
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma.service'; // Assuming you're using a PrismaService to handle Prisma client
 import { CreateExpenseDto } from './dto/create-expense.dto';
 import { UpdateExpenseDto } from './dto/update-expense.dto';
@@ -52,6 +52,17 @@ export class ExpenseService {
   }
 
   async remove(id: number) {
+    // Check if the expense exists
+    const expense = await this.prisma.expense.findUnique({
+      where: { id },
+    });
+
+    // If the expense doesn't exist, throw a NotFoundException
+    if (!expense) {
+      throw new NotFoundException(`Expense with ID ${id} not found.`);
+    }
+
+    // Proceed with deletion if the record exists
     return this.prisma.expense.delete({
       where: { id },
     });

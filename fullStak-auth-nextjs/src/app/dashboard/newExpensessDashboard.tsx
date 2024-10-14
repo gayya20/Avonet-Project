@@ -2,6 +2,8 @@ import { useState } from 'react';
 import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from 'recharts';
 import { Trash2 } from 'lucide-react';
 import { useSession } from "next-auth/react";
+import Swal from 'sweetalert2';
+import axios from 'axios'; // Import axios
 
 const COLORS = ['#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF'];
 
@@ -18,7 +20,11 @@ const ExpensesDashboard = () => {
     e.preventDefault();
 
     if (!description || !amount || !date || !type) {
-      alert("Please fill in all fields");
+      Swal.fire({
+        title: "Error!",
+        text: "Please fill in all fields.",
+        icon: "error",
+      });
       return;
     }
 
@@ -39,23 +45,31 @@ const ExpensesDashboard = () => {
 
     try {
       setLoading(true);
-      const response = await fetch("http://localhost:8000/expenses", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(newExpense),
-      });
+      const response = await axios.post("http://localhost:8000/expenses", newExpense);
 
-      const result = await response.json();
+      if (response.status === 201 || response.status === 200) { // Checking response status
+        Swal.fire({
+          title: "Done!",
+          text: "Expense added successfully.",
+          icon: "success",
+          showConfirmButton: false,
+          timer: 1500,
+          customClass: {
+            popup: 'bg-black',
+            title: 'text-orange-500 font-semibold text-lg',
+            content: 'text-white',
+            confirmButton: 'bg-orange-500 text-black',
+            color: 'rgb(185 176 169)',
+          },
+        });
 
-      if (response.ok) {
-        console.log("Expense added successfully:", result);
-        alert("Expense added successfully!");
-        setExpenses((prevExpenses) => [...prevExpenses, result]); // Use result for id
+        setExpenses((prevExpenses) => [...prevExpenses, response.data]); // Use response.data for new expense
       } else {
-        console.error("Error adding expense:", result);
-        alert(`Failed to add expense: ${result.message || "Unknown error"}`);
+        Swal.fire({
+          title: "Error!",
+          text: "Failed to add expense.",
+          icon: "error",
+        });
       }
     } catch (error) {
       console.error("Error:", error);
@@ -79,11 +93,9 @@ const ExpensesDashboard = () => {
 
     try {
       setLoading(true);
-      const response = await fetch(`http://localhost:8000/expenses/${expenseId}`, {
-        method: "DELETE",
-      });
+      const response = await axios.delete(`http://localhost:8000/expenses/${expenseId}`);
 
-      if (response.ok) {
+      if (response.status === 204 || response.status === 200) { // Successful delete check
         setExpenses((prevExpenses) => prevExpenses.filter((expense) => expense.id !== expenseId));
       } else {
         alert("Failed to delete expense.");
@@ -109,7 +121,7 @@ const ExpensesDashboard = () => {
   return (
     <div className="p-6 max-w-6xl mx-auto space-y-6">
       <h1 className="text-3xl font-bold mb-8">Expenses Dashboard</h1>
-      
+
       {/* Add Expense Form */}
       <div className="bg-white rounded-lg shadow-lg p-6">
         <h2 className="text-xl font-semibold mb-4">Add New Expense</h2>
@@ -223,25 +235,18 @@ const ExpensesDashboard = () => {
                   cx="50%"
                   cy="50%"
                   outerRadius={80}
-                  label={({ name, percent }) =>
-                    `${name}: ${(percent * 100).toFixed(0)}%`
-                  }
+                  label
                 >
                   {pieChartData.map((entry, index) => (
-                    <Cell
-                      key={`cell-${index}`}
-                      fill={COLORS[index % COLORS.length]}
-                    />
+                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                   ))}
                 </Pie>
                 <Tooltip />
                 <Legend />
               </PieChart>
             </ResponsiveContainer>
-            <p className="text-center font-semibold mt-4">
-              Total Expenses: LKR {totalExpenses.toFixed(2)}
-            </p>
           </div>
+          <p className="mt-4 font-semibold">Total Expenses: LKR {totalExpenses}</p>
         </div>
       </div>
     </div>

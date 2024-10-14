@@ -4,7 +4,6 @@ import { JWT } from "next-auth/jwt";
 import NextAuth from "next-auth/next";
 import CredentialsProvider from "next-auth/providers/credentials";
 
-
 async function refreshToken(token: JWT): Promise<JWT> {
   const res = await fetch(Backend_URL + "/auth/refresh", {
     method: "POST",
@@ -12,10 +11,8 @@ async function refreshToken(token: JWT): Promise<JWT> {
       authorization: `Refresh ${token.backendTokens.refreshToken}`,
     },
   });
-  console.log("refreshed");
-
   const response = await res.json();
-
+  
   return {
     ...token,
     backendTokens: response,
@@ -30,28 +27,27 @@ export const authOptions: NextAuthOptions = {
         username: {
           label: "Username",
           type: "text",
-          placeholder: "jsmith",
+          placeholder: "email",
         },
         password: { label: "Password", type: "password" },
       },
       async authorize(credentials, req) {
         if (!credentials?.username || !credentials?.password) return null;
+
         const { username, password } = credentials;
         const res = await fetch(Backend_URL + "/auth/login", {
           method: "POST",
-          body: JSON.stringify({
-            username,
-            password,
-          }),
+          body: JSON.stringify({ username, password }),
           headers: {
             "Content-Type": "application/json",
           },
         });
+
         if (res.status == 401) {
           console.log(res.statusText);
-
           return null;
         }
+        
         const user = await res.json();
         return user;
       },
@@ -62,8 +58,7 @@ export const authOptions: NextAuthOptions = {
     async jwt({ token, user }) {
       if (user) return { ...token, ...user };
 
-      if (new Date().getTime() < token.backendTokens.expiresIn)
-        return token;
+      if (new Date().getTime() < token.backendTokens.expiresIn) return token;
 
       return await refreshToken(token);
     },
@@ -74,9 +69,15 @@ export const authOptions: NextAuthOptions = {
 
       return session;
     },
+
+    async redirect({ url, baseUrl }) {
+      if (url === baseUrl) {
+        return Promise.resolve('/dashboard'); // Redirect to your dashboard path
+      }
+      return Promise.resolve(url); // Default behavior for other redirects
+    },
   },
 };
 
 const handler = NextAuth(authOptions);
-
 export { handler as GET, handler as POST };

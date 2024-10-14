@@ -3,6 +3,8 @@
 import { useEffect, useState } from "react";
 import { useSession } from "next-auth/react";
 import ExpensesTable from "./expensesTable";
+import Swal from "sweetalert2"; // Importing SweetAlert
+
 
 const ViewExpenses = () => {
   const [expenses, setExpenses] = useState([]);
@@ -71,9 +73,9 @@ const ViewExpenses = () => {
         },
       });
 
-      if (!response.ok) {
-        throw new Error("Failed to delete expense");
-      }
+      // if (!response.ok) {
+      //   throw new Error("Failed to delete expense");
+      // }
 
       setExpenses((prevExpenses) => 
         prevExpenses.filter((expense) => expense.id !== expenseId)
@@ -87,6 +89,27 @@ const ViewExpenses = () => {
       setLoading(false);
     }
   };
+  const handleEdit = (updatedExpense: Expense) => {
+    // Update the expenses state with the edited expense
+    setExpenses((prevExpenses) =>
+      prevExpenses.map((expense) =>
+        expense.id === updatedExpense.id ? updatedExpense : expense
+      )
+    );
+
+    // Optional: Show a confirmation alert
+    Swal.fire({
+      title: "Updated!",
+      text: "Your expense has been updated.",
+      icon: "success",
+      showConfirmButton: false,
+      timer: 1500,
+    });
+    
+  };
+
+
+  
 
   if (status === "loading") {
     return <div>Loading session...</div>;
@@ -117,11 +140,15 @@ const ViewExpenses = () => {
 
         </select>
       </div>
+      <h4 className="text-lg mt-6 mb-2">All {filterType && filterType}</h4>
+
       
       {!loading && !error && (
         <ExpensesTable 
           expenses={filteredExpenses} 
           onDelete={handleDelete} 
+          onEdit={handleEdit} // Ensure this is a function
+
         />
       )}
     </div>
